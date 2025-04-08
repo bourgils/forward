@@ -7,5 +7,9 @@ export const showCommand = new Command('show')
   .action(async () => {
     const sessionLinesInfo = await getSessionLinesInfo();
 
+    if (!sessionLinesInfo) {
+      process.exit(1);
+    }
+
     logger.box.info('Session Info', sessionLinesInfo.join('\n'));
   });
