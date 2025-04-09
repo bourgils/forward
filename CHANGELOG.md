@@ -20,3 +20,14 @@ All notable changes to this project will be documented in this file.
 - 💾 Disk usage tracker + cleanup summary
 - 📦 Linter, Prettier, EditorConfig setup
 - 📄 README + roadmap
+
+## [0.1.1]
+
+### Added
+
+- `fwd add`: Add package to the project
+- `fwd remove`: Remove package from the project
+
+### Fixed
+
+- Fixed a crash when running `fwd show` in a non-initialized project (before `fwd init`)
