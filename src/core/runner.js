@@ -54,7 +54,7 @@ export async function runInTemp(pipe, args = []) {
     const src = path.join(cwd, file);
     const dest = path.join(tempDir, file);
     if (await fs.pathExists(src)) {
-      await fs.copy(src, dest);
+      await fs.ensureSymlink(src, dest, 'junction');
       copied.push(file);
     }
   }

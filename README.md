@@ -28,8 +28,8 @@ fwd init         # Detect pipe & package manager (vite, npm, etc.)
 fwd dev          # → vite dev or next dev
 fwd run build    # → npm run build (in temp env)
 fwd exec echo Hello
-fwd install react react-dom
-fwd uninstall react
+fwd add react react-dom
+fwd remove react
 fwd reset        # Clean up session
 ```
 
@@ -37,16 +37,17 @@ fwd reset        # Clean up session
 
 ## 🔧 CLI Commands
 
-| Command                          | Alias | Description                          |
-| -------------------------------- | ----- | ------------------------------------ |
-| `fwd init`                       |       | Auto-detect pipe & pkg manager       |
-| `fwd show`                       |       | Show current session info            |
-| `fwd run <script>`               |       | Run npm script from package.json     |
-| `fwd exec <cli> [cmd [args...]]` |       | Execute any raw command in session   |
-| `fwd use <pipe>`                 |       | Manually set runtime (vite, next...) |
-| `fwd reset`                      |       | Reset and delete current session     |
-| `fwd use <pipe>`                 |       | Manually set runtime (vite, next...) |
-| `fwd <cmd> [args...]`            |       | Reset and delete current session     |
+| Command                          | Alias | Description                                           |
+| -------------------------------- | ----- | ----------------------------------------------------- |
+| `fwd init`                       |       | Auto-detect pipe & pkg manager                        |
+| `fwd show`                       |       | Show current session info                             |
+| `fwd run <script>`               |       | Run npm script from package.json                      |
+| `fwd exec <cli> [cmd [args...]]` |       | Execute any raw command in session                    |
+| `fwd use <pipe>`                 |       | Manually set runtime (vite, next...)                  |
+| `fwd reset`                      |       | Reset and delete current session                      |
+| `fwd <cmd> [args...]`            |       | Run a command through the pipe, eg. `fwd dev --debug` |
+| `fwd add`                        |       | Add a package                                         |
+| `fwd remove`                     |       | Remove a package                                      |
 
 ---
 
@@ -113,5 +114,5 @@ Made with ❤️ by @bourgils
 
 - 🧹 Code cleanup & architecture: refactor into classes/services for better structure — _coming soon_
 - 🧠 Session persistence: list and delete past sessions (`fwd sessions`, `fwd sessions clear`) — _coming soon_
-- 📦 Package manager UX: support `fwd install <pkg>` and `fwd uninstall <pkg>` directly — _coming soon_
+- 📦 Package manager UX: support `fwd install <pkg>` and `fwd uninstall <pkg>` directly — ✔️
 - ⚡️ Remote execution UX: support `fwd dist <github_repo>` to fetch & run a repo temporarily — _coming soon_

@@ -6,6 +6,8 @@ import { useCommand } from './commands/use.js';
 import { showCommand } from './commands/show.js';
 import { resetCommand } from './commands/reset.js';
 import { pipeCommand } from './commands/pipe.js';
+import { addCommand } from './commands/add.js';
+import { removeCommand } from './commands/remove.js';
 import registerPassThrough from '../core/pass-through.js';
 
 export function main() {
@@ -20,6 +22,8 @@ export function main() {
   program.addCommand(useCommand);
   program.addCommand(resetCommand);
   program.addCommand(pipeCommand);
+  program.addCommand(addCommand);
+  program.addCommand(removeCommand);
 
   registerPassThrough(program);
 
