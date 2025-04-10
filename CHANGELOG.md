@@ -32,7 +32,7 @@ All notable changes to this project will be documented in this file.
 
 - Fixed a crash when running `fwd show` in a non-initialized project (before `fwd env init`)
 
-## [0.2.0]
+## [0.2.1]
 
 ### Added
 
@@ -53,7 +53,7 @@ All notable changes to this project will be documented in this file.
 
 ### Removed
 
-- `fwd env init`: Replaced by `fwd env init`
+- `fwd init`: Replaced by `fwd env init`
 - `fwd show`: Replaced by `fwd env show`
 - `fwd use`: Replaced by `fwd env use`
 - `fwd reset`: Replaced by `fwd env reset`
