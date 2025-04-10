@@ -26,7 +26,7 @@ npm install -g @bourgils/forward
 ```
 fwd env init      # Initialize environment and detect pipe & package manager
 fwd env show      # Show current environment configuration
-fwd env use       # Set specific environment configuration
+fwd env set       # Set specific environment configuration
 fwd env reset     # Reset environment to default state
 fwd doctor        # Check system compatibility and configuration
 fwd dev           # → vite dev or next dev
@@ -44,7 +44,7 @@ fwd remove react
 | -------------------------------- | ----- | ---------------------------------------------------- |
 | `fwd env init`                   |       | Initialize environment and detect pipe & pkg manager |
 | `fwd env show`                   |       | Show current environment configuration               |
-| `fwd env use`                    |       | Set specific environment configuration               |
+| `fwd env set`                    |       | Set specific environment configuration               |
 | `fwd env reset`                  |       | Reset environment to default state                   |
 | `fwd doctor`                     |       | Check system compatibility and configuration         |
 | `fwd run [script]`               |       | Run npm script from package.json                     |
@@ -73,7 +73,7 @@ fwd remove react
 - bun
 - astro
 
-> Environment not detected? Just use: `fwd env use`
+> Environment not detected? Just use: `fwd env set`
 
 ---
 

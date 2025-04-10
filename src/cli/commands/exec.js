@@ -3,8 +3,8 @@ import { runInTemp } from '../../core/runner.js';
 import logger from '../../core/logger.js';
 
 export const execCommand = new Command('exec')
-  .description('Run any raw shell command inside the temp environment, use -- to pass CLI flags')
-  .argument('[cli] [cmd [args...]]', 'Command with arguments (use -- to pass CLI flags)')
+  .description('Run any raw shell command inside the temp environment')
+  .argument('[cli] [cmd [args...]]', 'Command with arguments')
   .allowUnknownOption(true)
   .passThroughOptions()
   .action(async (_, __, commandObject) => {

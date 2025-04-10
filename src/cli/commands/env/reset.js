@@ -17,6 +17,21 @@ export const resetCommand = new Command('reset')
       return;
     }
 
+    const filesToRemove = [];
+
+    if (fs.pathExistsSync(pipeFile)) {
+      filesToRemove.push(pipeFile);
+    }
+
+    if (fs.pathExistsSync(tempDir)) {
+      filesToRemove.push(tempDir);
+    }
+
+    if (!filesToRemove.length) {
+      logger.warn('Nothing to reset — no environment found.');
+      return;
+    }
+
     const { confirm } = await prompts({
       type: 'confirm',
       name: 'confirm',
@@ -29,21 +44,9 @@ export const resetCommand = new Command('reset')
       return;
     }
 
-    const actions = [];
+    filesToRemove.forEach((file) => {
+      fs.removeSync(file);
+    });
 
-    if (await fs.pathExists(pipeFile)) {
-      await fs.remove(pipeFile);
-      actions.push('environement config');
-    }
-
-    if (await fs.pathExists(tempDir)) {
-      await fs.remove(tempDir);
-      actions.push('temp directory');
-    }
-
-    if (actions.length === 0) {
-      logger.warn('Nothing to reset — no environment found.');
-    } else {
-      logger.success(`Reset done. Removed: ${actions.join(', ')}`);
-    }
+    logger.success(`Reset done.`);
   });

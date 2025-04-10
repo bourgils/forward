@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { initCommand } from './init.js';
 import { resetCommand } from './reset.js';
-import { useCommand } from './use.js';
+import { setCommand } from './set.js';
 import { showCommand } from './show.js';
 
 export const envCommand = new Command('env')
@@ -10,5 +10,5 @@ export const envCommand = new Command('env')
   .showHelpAfterError(true)
   .addCommand(initCommand)
   .addCommand(showCommand)
-  .addCommand(useCommand)
+  .addCommand(setCommand)
   .addCommand(resetCommand);

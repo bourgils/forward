@@ -10,7 +10,7 @@ export default function runtimeCheck(thisCommand, actionCommand) {
     logger.error('No package.json found');
     const currentProjectDirectoryName = path.basename(process.cwd());
     logger.raw(
-      `Are you that \`${chalk.bold(currentProjectDirectoryName)}\` is a valid nodejs project?`
+      `Are you sure that \`${chalk.bold(currentProjectDirectoryName)}\` is a valid nodejs project?`
     );
     process.exit(1);
   }
