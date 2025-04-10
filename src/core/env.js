@@ -40,6 +40,24 @@ export function getScriptsList() {
   return scriptsList;
 }
 
+export function getScripts() {
+  let scriptsList = [];
+  const pkgPath = getPackageJsonPath();
+  if (fs.pathExistsSync(pkgPath)) {
+    try {
+      const pkg = fs.readJsonSync(pkgPath);
+      scriptsList = Object.keys(pkg.scripts || {}).map((name) => ({
+        name,
+        value: pkg.scripts[name],
+      }));
+    } catch {
+      scriptsList = [];
+    }
+  }
+
+  return scriptsList;
+}
+
 export async function getEnvPaths() {
   const id = getProjectId();
   const pipeFile = path.join(envsDir, `${id}.json`);
@@ -109,8 +127,6 @@ export async function createEnv() {
 export async function getEnvLinesInfo() {
   const config = await getEnvConfig();
   const { tempDir } = await getEnvPaths();
-
-  const pkgPath = path.join(process.cwd(), 'package.json');
 
   if (!config.currentPipe && !config.currentPackageManager) {
     logger.info('No active env found for this project. Run `fwd env init`.');

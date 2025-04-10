@@ -9,7 +9,7 @@ export const addCommand = new Command('add')
   .alias('install')
   .alias('i')
   .description('Add a package to the project')
-  .argument('<package>', 'Package to install')
+  .argument('[package]', 'Package to install')
   .allowUnknownOption()
   .action(async (...args) => {
     const packageManager = await getPackageManager();
@@ -21,6 +21,11 @@ export const addCommand = new Command('add')
     }
 
     const packages = args[2].args;
+
+    if (packages.length === 0) {
+      logger.error('No package provided.');
+      process.exit(1);
+    }
 
     const commandArgs = ['install', ...packages];
 

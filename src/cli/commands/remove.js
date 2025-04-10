@@ -8,7 +8,7 @@ import fs from 'fs-extra';
 export const removeCommand = new Command('remove')
   .alias('uninstall')
   .description('Remove a package from the project')
-  .argument('<package>', 'Package to remove')
+  .argument('[package]', 'Package to remove')
   .allowUnknownOption()
   .action(async (...args) => {
     const packageManager = await getPackageManager();
@@ -20,6 +20,11 @@ export const removeCommand = new Command('remove')
     }
 
     const packages = args[2].args;
+
+    if (packages.length === 0) {
+      logger.error('No package provided.');
+      process.exit(1);
+    }
 
     const commandArgs = ['uninstall', ...packages];
 

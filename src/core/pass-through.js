@@ -1,10 +1,11 @@
 import logger from './logger.js';
 import { runInTemp } from './runner.js';
 import { getEnvConfig } from './env.js';
+import chalk from 'chalk';
 
 const registerPassThrough = (program) => {
   program
-    .arguments('<command> [args...]')
+    .arguments('[command] [args...]')
     .allowUnknownOption()
     .action(async (...args) => {
       const { currentPipe } = await getEnvConfig();
@@ -12,12 +13,12 @@ const registerPassThrough = (program) => {
       const commandArgs = args[1];
 
       if (!currentPipe) {
-        logger.error('No pipe found. Run "fwd env init" first.');
+        logger.error('No environment found. Run "fwd env init" first.');
         process.exit(1);
       }
 
       logger.log(
-        `Passing command \`${command}\` through the pipe: ${currentPipe} ${command} ${commandArgs.join(' ')}`
+        `Passing command \`${command}\` through using ${currentPipe}: ${chalk.bold(`${currentPipe} ${command} ${commandArgs.join(' ')}`)}`
       );
 
       await runInTemp(currentPipe, [command, ...commandArgs]);

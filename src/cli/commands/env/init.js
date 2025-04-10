@@ -1,5 +1,4 @@
 import { Command } from 'commander';
-import prompts from 'prompts';
 import { detectEnvironment } from '../../../core/detector.js';
 import {
   createEnv,

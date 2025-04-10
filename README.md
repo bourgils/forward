@@ -47,8 +47,8 @@ fwd remove react
 | `fwd env use`                    |       | Set specific environment configuration               |
 | `fwd env reset`                  |       | Reset environment to default state                   |
 | `fwd doctor`                     |       | Check system compatibility and configuration         |
-| `fwd run <script>`               |       | Run npm script from package.json                     |
-| `fwd exec <cli> [cmd [args...]]` |       | Execute any raw command in session                   |
+| `fwd run [script]`               |       | Run npm script from package.json                     |
+| `fwd exec [cli] [cmd [args...]]` |       | Execute any raw command in session                   |
 | `fwd add`                        |       | Add a package                                        |
 | `fwd remove`                     |       | Remove a package                                     |
 
@@ -116,4 +116,4 @@ Made with ❤️ by @bourgils
 ### 🧠 Planned Features
 
 - 🧹 Code cleanup & architecture: refactor into classes/services for better structure — _coming soon_
-- ⚡️ Remote execution UX: support `fwd dist <github_repo>` to fetch & run a repo temporarily — _coming soon_
+- ⚡️ Remote execution UX: support `fwd dist [github_repo]` to fetch & run a repo temporarily — _coming soon_
