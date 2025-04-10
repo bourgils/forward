@@ -73,3 +73,21 @@ All notable changes to this project will be documented in this file.
 
 - Argument handling in multiple commands
 - Better handling of edge cases when no arguments provided
+
+## [0.3.0]
+
+### Changed
+
+- Renamed `fwd env use` to `fwd env set` for better clarity
+- Improved environment initialization feedback with detailed progress messages
+- Enhanced error messages and user guidance
+- Refactored constants into dedicated files for better maintainability
+- Updated logger icons for better visual consistency
+
+### Fixed
+
+- Improved environment reset process with better file handling
+- Enhanced runtime checks with clearer error messages
+- Fixed typos in user-facing messages
+
+---
