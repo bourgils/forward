@@ -3,14 +3,14 @@ import path from 'path';
 
 const pipeSignatures = [
   { name: 'vite', files: ['vite.config.js', 'vite.config.ts'], pkg: 'vite' },
-  { name: 'next', pkg: 'next' },
-  { name: 'nuxt', pkg: 'nuxt' },
+  { name: 'next', files: ['next.config.js', 'next.config.mjs'], pkg: 'next' },
+  { name: 'nuxt', files: ['nuxt.config.js', 'nuxt.config.ts'], pkg: 'nuxt' },
   { name: 'react-scripts', pkg: 'react-scripts' },
   { name: 'bun', files: ['bun.lockb'] },
   { name: 'astro', pkg: 'astro' },
 ];
 
-function detectPipe(cwd = process.cwd()) {
+export function detectPipe(cwd = process.cwd()) {
   const pkgJsonPath = path.join(cwd, 'package.json');
   const hasPkgJson = fs.existsSync(pkgJsonPath);
   const pkg = hasPkgJson ? JSON.parse(fs.readFileSync(pkgJsonPath)) : null;
@@ -18,7 +18,7 @@ function detectPipe(cwd = process.cwd()) {
   for (const pipe of pipeSignatures) {
     if (pipe.files) {
       for (const file of pipe.files) {
-        if (fs.existsSync(path.join(cwd, file))) return pipe.name;
+        if (fs.existsSync(path.join(cwd, file))) return { pipe: pipe.name, env: 'frontend' };
       }
     }
 
@@ -29,15 +29,32 @@ function detectPipe(cwd = process.cwd()) {
       };
 
       if (allDeps[pipe.pkg]) {
-        return pipe.name;
+        return { pipe: pipe.name, env: 'frontend' };
       }
+    }
+  }
+
+  const commonFiles = [
+    'src/index.js',
+    'src/server.js',
+    'src/app.js',
+    'src/main.js',
+    'index.js',
+    'server.js',
+    'app.js',
+    'main.js',
+  ];
+
+  for (const file of commonFiles) {
+    if (fs.existsSync(path.join(cwd, file)) && (pkg?.scripts?.start || pkg?.scripts?.dev)) {
+      return { pipe: 'node', env: 'backend' };
     }
   }
 
   return null;
 }
 
-function detectPackageManager(cwd = process.cwd()) {
+export function detectPackageManager(cwd = process.cwd()) {
   const locks = [
     { name: 'pnpm', file: 'pnpm-lock.yaml' },
     { name: 'yarn', file: 'yarn.lock' },
@@ -52,9 +69,14 @@ function detectPackageManager(cwd = process.cwd()) {
   return 'npm';
 }
 
+export function detectProjectName(cwd = process.cwd()) {
+  return path.basename(cwd);
+}
+
 export function detectEnvironment() {
   return {
-    pipe: detectPipe(),
+    projectName: detectProjectName(),
+    ...detectPipe(),
     packageManager: detectPackageManager(),
   };
 }

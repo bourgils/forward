@@ -1,27 +1,29 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { execa } from 'execa';
-import { getSessionPaths, getPackageManager } from './session.js';
+import prettyMs from 'pretty-ms';
+import { getEnvPaths, getPackageManager } from './env.js';
 import prettyBytes from 'pretty-bytes';
 import logger from './logger.js';
 
-async function getFolderSize(folderPath) {
+function getFolderSize(folderPath) {
   let total = 0;
 
-  async function walk(dir) {
-    const files = await fs.readdir(dir);
+  function walk(dir) {
+    const files = fs.readdirSync(dir);
+
     for (const file of files) {
       const fullPath = path.join(dir, file);
-      const stat = await fs.stat(fullPath);
+      const stat = fs.statSync(fullPath);
       if (stat.isDirectory()) {
-        await walk(fullPath);
+        walk(fullPath);
       } else {
         total += stat.size;
       }
     }
   }
 
-  await walk(folderPath);
+  walk(folderPath);
   return total;
 }
 
@@ -29,7 +31,8 @@ const cwd = process.cwd();
 let alive = true;
 
 export async function runInTemp(pipe, args = []) {
-  const { tempDir } = await getSessionPaths();
+  const start = Date.now();
+  const { tempDir } = await getEnvPaths();
 
   await fs.emptyDir(tempDir);
 
@@ -48,13 +51,17 @@ export async function runInTemp(pipe, args = []) {
     '.env.local',
     'tsconfig.json',
     'jsconfig.json',
+    'package-lock.json',
+    'pnpm-lock.yaml',
+    'yarn.lock',
+    'bun.lockb',
   ];
 
   for (const file of criticalFiles) {
     const src = path.join(cwd, file);
     const dest = path.join(tempDir, file);
-    if (await fs.pathExists(src)) {
-      await fs.ensureSymlink(src, dest, 'junction');
+    if (fs.pathExistsSync(src)) {
+      fs.ensureSymlinkSync(src, dest, 'junction');
       copied.push(file);
     }
   }
@@ -68,8 +75,8 @@ export async function runInTemp(pipe, args = []) {
   };
 
   const lockFile = lockFiles[packageManager];
-  if (lockFile && (await fs.pathExists(path.join(cwd, lockFile)))) {
-    await fs.copy(path.join(cwd, lockFile), path.join(tempDir, lockFile));
+  if (lockFile && fs.pathExistsSync(path.join(cwd, lockFile))) {
+    fs.copySync(path.join(cwd, lockFile), path.join(tempDir, lockFile));
     copied.push(lockFile);
   }
 
@@ -78,28 +85,82 @@ export async function runInTemp(pipe, args = []) {
     PATH: `${path.join(tempDir, 'node_modules', '.bin')}${path.delimiter}${process.env.PATH}`,
   };
 
-  logger.raw(`📁 Session dir: ${tempDir}`);
+  let linked = false;
+
+  logger.raw(`📁 Workspace dir: ${tempDir}`);
   logger.raw(`📦 Copied: ${copied.join(', ')}`);
   logger.raw(`📥 Installing with ${packageManager}...`);
 
-  const { stdout, stderr } = await execa(packageManager, ['install'], {
+  const subprocess = execa(packageManager, ['install'], {
     cwd: tempDir,
     env,
   });
 
-  logger.box.info(`${packageManager} install`, stdout);
+  const clean = async () => {
+    if (!alive) return;
+    alive = false;
 
-  if (stderr) {
-    logger.error(`Errors:\n ${stderr}`);
+    if (fs.pathExistsSync(lockPath)) {
+      fs.removeSync(lockPath);
+    }
+
+    if (linked && fs.pathExistsSync(realNodeModules)) {
+      const stat = fs.lstatSync(realNodeModules);
+      if (stat.isSymbolicLink()) {
+        logger.raw('\n⛓️‍💥  Removing linked node_modules from project...');
+        fs.removeSync(realNodeModules);
+      }
+    }
+
+    const sizeBefore = getFolderSize(tempDir);
+
+    logger.raw('\n🧹 Cleaning up workspace...');
+
+    if (fs.pathExistsSync(tempDir)) {
+      fs.removeSync(tempDir);
+    }
+
+    const duration = Date.now() - start;
+
+    logger.box.success(
+      'Workspace removed',
+      [
+        `💾 ${prettyBytes(sizeBefore)} freed from disk`,
+        `💨 Workspace lasted ${prettyMs(duration)}`,
+      ].join('\n')
+    );
+
+    process.exit(0);
+  };
+
+  ['SIGINT', 'SIGTERM', 'SIGHUP'].forEach((signal) => {
+    process.once(signal, async () => {
+      subprocess.kill(signal);
+      await clean();
+    });
+  });
+
+  try {
+    const { stdout, stderr } = await subprocess;
+
+    if (stdout) {
+      logger.box.info(`${packageManager} install`, stdout);
+    }
+
+    if (stderr) {
+      logger.error(`Errors:\n ${stderr}`);
+    }
+  } catch (error) {
+    logger.error(`${packageManager} install failed: ${error.message}`);
+    await clean();
   }
 
   const realNodeModules = path.join(cwd, 'node_modules');
   const tempNodeModules = path.join(tempDir, 'node_modules');
 
-  let linked = false;
-  if (!(await fs.pathExists(realNodeModules))) {
+  if (!fs.pathExistsSync(realNodeModules)) {
     logger.raw('🔗 Linking temp node_modules into project...');
-    await fs.ensureSymlink(tempNodeModules, realNodeModules, 'junction');
+    fs.ensureSymlinkSync(tempNodeModules, realNodeModules, 'junction');
     linked = true;
   }
 
@@ -110,35 +171,6 @@ export async function runInTemp(pipe, args = []) {
     stdio: 'inherit',
     env,
   });
-
-  const clean = async () => {
-    if (!alive) return;
-    alive = false;
-
-    if (await fs.pathExists(lockPath)) {
-      await fs.remove(lockPath);
-    }
-
-    if (linked && (await fs.pathExists(realNodeModules))) {
-      const stat = await fs.lstat(realNodeModules);
-      if (stat.isSymbolicLink()) {
-        logger.raw('🧹 Removing linked node_modules from project...');
-        await fs.remove(realNodeModules);
-      }
-    }
-
-    const sizeBefore = await getFolderSize(tempDir);
-
-    logger.raw('\n🧹 Cleaning up session...');
-
-    if (await fs.pathExists(tempDir)) {
-      await fs.remove(tempDir);
-    }
-
-    logger.box.success('🧹 Session removed', `💾 ${prettyBytes(sizeBefore)} freed from disk`);
-
-    process.exit(0);
-  };
 
   process.on('SIGINT', clean);
   process.on('SIGTERM', clean);

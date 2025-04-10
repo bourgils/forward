@@ -11,7 +11,7 @@ export default [
   },
   {
     files: ['**/*.js'],
-    ignores: ['node_modules/', 'dist/', '.fwd/', 'sessions/'],
+    ignores: ['node_modules/', 'dist/', '.fwd/', 'workspaces/'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',

@@ -30,7 +30,6 @@
     "sandbox",
     "isolated",
     "scripts",
-    "session",
     "pipe",
     "frontend",
     "developer-experience"
@@ -41,9 +40,11 @@
     "boxen": "^7.1.1",
     "chalk": "^5.3.0",
     "commander": "^11.1.0",
+    "console-table-printer": "^2.12.1",
     "execa": "^8.0.1",
     "fs-extra": "^11.2.0",
     "pretty-bytes": "^6.1.1",
+    "pretty-ms": "^9.2.0",
     "prompts": "^2.4.2"
   },
   "engines": {

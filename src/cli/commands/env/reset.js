@@ -1,14 +1,15 @@
 import { Command } from 'commander';
 import prompts from 'prompts';
-import fs from 'fs-extra';
-import { getSessionPaths } from '../../core/session.js';
 import path from 'path';
-import logger from '../../core/logger.js';
+import fs from 'fs-extra';
+import { getEnvPaths } from '../../../core/env.js';
+import logger from '../../../core/logger.js';
 
 export const resetCommand = new Command('reset')
-  .description("Reset the current project's Forward session (pipe & cache)")
+  .alias('r')
+  .description("Reset the current project's Forward workspace (pipe & cache)")
   .action(async () => {
-    const { tempDir, pipeFile } = await getSessionPaths();
+    const { tempDir, pipeFile } = await getEnvPaths();
 
     if (await fs.pathExists(path.join(tempDir, '.fwd.lock'))) {
       logger.error('A Forward process is currently running for this project.');
@@ -19,12 +20,12 @@ export const resetCommand = new Command('reset')
     const { confirm } = await prompts({
       type: 'confirm',
       name: 'confirm',
-      message: `Are you sure you want to reset the Forward session for this project?`,
+      message: `Are you sure you want to reset the fwd environment for this project?`,
       initial: false,
     });
 
     if (!confirm) {
-      logger.info('Session was not reset.');
+      logger.info('Environment was not reset.');
       return;
     }
 
@@ -32,7 +33,7 @@ export const resetCommand = new Command('reset')
 
     if (await fs.pathExists(pipeFile)) {
       await fs.remove(pipeFile);
-      actions.push('pipe config');
+      actions.push('environement config');
     }
 
     if (await fs.pathExists(tempDir)) {
@@ -41,7 +42,7 @@ export const resetCommand = new Command('reset')
     }
 
     if (actions.length === 0) {
-      logger.warn('Nothing to reset — no session found.');
+      logger.warn('Nothing to reset — no environment found.');
     } else {
       logger.success(`Reset done. Removed: ${actions.join(', ')}`);
     }

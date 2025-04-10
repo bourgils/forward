@@ -1,13 +1,13 @@
 import logger from './logger.js';
 import { runInTemp } from './runner.js';
-import { getSessionConfig } from './session.js';
+import { getEnvConfig } from './env.js';
 
 const registerPassThrough = (program) => {
   program
     .arguments('<command> [args...]')
     .allowUnknownOption()
     .action(async (...args) => {
-      const { currentPipe } = await getSessionConfig();
+      const { currentPipe } = await getEnvConfig();
       const command = args[0];
       const commandArgs = args[1];
 
@@ -16,7 +16,9 @@ const registerPassThrough = (program) => {
         process.exit(1);
       }
 
-      logger.log(`Passing through command: ${currentPipe} ${command} ${commandArgs.join(' ')}`);
+      logger.log(
+        `Passing command \`${command}\` through the pipe: ${currentPipe} ${command} ${commandArgs.join(' ')}`
+      );
 
       await runInTemp(currentPipe, [command, ...commandArgs]);
     });
