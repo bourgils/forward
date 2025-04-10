@@ -58,3 +58,18 @@ All notable changes to this project will be documented in this file.
 - `fwd use`: Replaced by `fwd env use`
 - `fwd reset`: Replaced by `fwd env reset`
 - Session management system
+
+## [0.2.2]
+
+### Enhanced
+
+- Made all command arguments optional for better UX
+- Added interactive script selection in `run` command
+- Improved error messages and error handling across commands
+- Enhanced visual feedback with chalk styling
+- Expanded `doctor` command with more detailed diagnostics
+
+### Fixed
+
+- Argument handling in multiple commands
+- Better handling of edge cases when no arguments provided
