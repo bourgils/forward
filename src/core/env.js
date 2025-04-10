@@ -113,7 +113,7 @@ export async function getEnvLinesInfo() {
   const pkgPath = path.join(process.cwd(), 'package.json');
 
   if (!config.currentPipe && !config.currentPackageManager) {
-    logger.info('No active env found for this project. Run `fwd init`.');
+    logger.info('No active env found for this project. Run `fwd env init`.');
     return;
   }
 

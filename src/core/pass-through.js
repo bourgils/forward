@@ -12,7 +12,7 @@ const registerPassThrough = (program) => {
       const commandArgs = args[1];
 
       if (!currentPipe) {
-        logger.error('No pipe found. Run "fwd init" first.');
+        logger.error('No pipe found. Run "fwd env init" first.');
         process.exit(1);
       }
 

@@ -24,38 +24,41 @@ npm install -g @bourgils/forward
 ### Inside a project with a `package.json`
 
 ```
-fwd init         # Detect pipe & package manager (vite, npm, etc.)
-fwd dev          # → vite dev or next dev
-fwd run build    # → npm run build (in temp env)
+fwd env init      # Initialize environment and detect pipe & package manager
+fwd env show      # Show current environment configuration
+fwd env use       # Set specific environment configuration
+fwd env reset     # Reset environment to default state
+fwd doctor        # Check system compatibility and configuration
+fwd dev           # → vite dev or next dev
+fwd run build     # → npm run build (in temp env)
 fwd exec echo Hello
 fwd add react react-dom
 fwd remove react
-fwd reset        # Clean up session
 ```
 
 ---
 
 ## 🔧 CLI Commands
 
-| Command                          | Alias | Description                                           |
-| -------------------------------- | ----- | ----------------------------------------------------- |
-| `fwd init`                       |       | Auto-detect pipe & pkg manager                        |
-| `fwd show`                       |       | Show current session info                             |
-| `fwd run <script>`               |       | Run npm script from package.json                      |
-| `fwd exec <cli> [cmd [args...]]` |       | Execute any raw command in session                    |
-| `fwd use <pipe>`                 |       | Manually set runtime (vite, next...)                  |
-| `fwd reset`                      |       | Reset and delete current session                      |
-| `fwd <cmd> [args...]`            |       | Run a command through the pipe, eg. `fwd dev --debug` |
-| `fwd add`                        |       | Add a package                                         |
-| `fwd remove`                     |       | Remove a package                                      |
+| Command                          | Alias | Description                                          |
+| -------------------------------- | ----- | ---------------------------------------------------- |
+| `fwd env init`                   |       | Initialize environment and detect pipe & pkg manager |
+| `fwd env show`                   |       | Show current environment configuration               |
+| `fwd env use`                    |       | Set specific environment configuration               |
+| `fwd env reset`                  |       | Reset environment to default state                   |
+| `fwd doctor`                     |       | Check system compatibility and configuration         |
+| `fwd run <script>`               |       | Run npm script from package.json                     |
+| `fwd exec <cli> [cmd [args...]]` |       | Execute any raw command in session                   |
+| `fwd add`                        |       | Add a package                                        |
+| `fwd remove`                     |       | Remove a package                                     |
 
 ---
 
 ## 📁 How it works
 
-- Creates a session in `~/.fwd/sessions/<hash>/`
-- Installs `node_modules` there
-- Optionally symlinks it into your project during runtime
+- Creates an isolated environment for your project
+- Manages dependencies in a temporary location
+- Provides runtime checks for compatibility
 - Launches your pipe (vite, next, etc.) with full hot reload support
 - Cleans everything after Ctrl+C
 
@@ -70,7 +73,7 @@ fwd reset        # Clean up session
 - bun
 - astro
 
-> Pipe not detected? Just use: `fwd use vite`
+> Environment not detected? Just use: `fwd env use`
 
 ---
 
@@ -96,7 +99,7 @@ npm link
 Then go into any project and run:
 
 ```
-fwd init
+fwd env init
 fwd dev or fwd start
 ```
 
@@ -113,6 +116,4 @@ Made with ❤️ by @bourgils
 ### 🧠 Planned Features
 
 - 🧹 Code cleanup & architecture: refactor into classes/services for better structure — _coming soon_
-- 🧠 Session persistence: list and delete past sessions (`fwd sessions`, `fwd sessions clear`) — _coming soon_
-- 📦 Package manager UX: support `fwd install <pkg>` and `fwd uninstall <pkg>` directly — ✔️
 - ⚡️ Remote execution UX: support `fwd dist <github_repo>` to fetch & run a repo temporarily — _coming soon_

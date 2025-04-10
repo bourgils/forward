@@ -11,7 +11,7 @@ export const runCommand = new Command('run')
     const packageManager = await getPackageManager();
 
     if (!packageManager) {
-      logger.error('No package manager found. Run "fwd init" first.');
+      logger.error('No package manager found. Run "fwd env init" first.');
       process.exit(1);
     }
 

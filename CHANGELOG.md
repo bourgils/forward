@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- `fwd init`: Auto-detect pipe and package manager
+- `fwd env init`: Auto-detect pipe and package manager
 - `fwd show`: Show current session info
 - `fwd run <script>`: run commands in temp environment
 - `fwd exec <cli> [cmd [args...]]`: Run any shell command inside isolated env
@@ -30,4 +30,31 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
-- Fixed a crash when running `fwd show` in a non-initialized project (before `fwd init`)
+- Fixed a crash when running `fwd show` in a non-initialized project (before `fwd env init`)
+
+## [0.2.0]
+
+### Added
+
+- `fwd env init`: New environment initialization command
+- `fwd env show`: Display current environment configuration
+- `fwd env use`: Set specific environment configuration
+- `fwd env reset`: Reset environment to default state
+- `fwd doctor`: New command to check system compatibility
+- Runtime environment checks for better compatibility
+- Version management system
+
+### Changed
+
+- Refactored CLI commands structure under `env` namespace
+- Improved environment variable handling
+- Enhanced project architecture with better separation of concerns
+- Removed session-based management in favor of environment-based approach
+
+### Removed
+
+- `fwd env init`: Replaced by `fwd env init`
+- `fwd show`: Replaced by `fwd env show`
+- `fwd use`: Replaced by `fwd env use`
+- `fwd reset`: Replaced by `fwd env reset`
+- Session management system
