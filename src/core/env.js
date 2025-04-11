@@ -9,8 +9,12 @@ const baseDir = path.join(os.homedir(), '.fwd');
 const envsDir = path.join(baseDir, 'envs');
 const workspacesDir = path.join(baseDir, 'workspaces');
 
-function getProjectId(cwd = process.cwd()) {
+export function getProjectId(cwd = process.cwd()) {
   return crypto.createHash('md5').update(cwd).digest('hex').slice(0, 8);
+}
+
+export function getProjectName(cwd = process.cwd()) {
+  return path.basename(cwd);
 }
 
 export async function setProjectName(projectName) {

@@ -9,7 +9,7 @@ import runtimeCheck from '../core/runtime-check.js';
 import registerPassThrough from '../core/pass-through.js';
 import { envCommand } from './commands/env/index.js';
 import { getVersion } from '../core/version.js';
-
+import { httpsCommand } from './commands/https.js';
 export function main() {
   const program = new Command();
 
@@ -32,7 +32,7 @@ export function main() {
   program.addCommand(pipeCommand);
   program.addCommand(addCommand);
   program.addCommand(removeCommand);
-
+  program.addCommand(httpsCommand);
   registerPassThrough(program);
 
   if (!process.argv.slice(2).length) {

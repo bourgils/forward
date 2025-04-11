@@ -1,0 +1,14 @@
+# local
+.gitignore
+.editorconfig
+.vscode/
+
+# source
+src/
+*.log
+
+# configs
+.editorconfig
+.prettierrc
+eslint.config.js
+

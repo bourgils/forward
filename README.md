@@ -1,7 +1,9 @@
-# 🔁 forward (CLI: `fwd`)
+# ⚡️ forward (CLI: `fwd`)
 
 > Isolated, throwaway runtime for modern frontend projects
 > No `node_modules`, no pollution — just run, dev, and it disappears.
+
+> ⚠️ **Important**: Forward (fwd) is not a package manager. It's a command forwarding tool that creates temporary environments with isolated `node_modules` for your commands. It doesn't manage your project's dependencies permanently.
 
 ---
 
@@ -40,17 +42,18 @@ fwd remove react
 
 ## 🔧 CLI Commands
 
-| Command                          | Alias | Description                                          |
-| -------------------------------- | ----- | ---------------------------------------------------- |
-| `fwd env init`                   |       | Initialize environment and detect pipe & pkg manager |
-| `fwd env show`                   |       | Show current environment configuration               |
-| `fwd env set`                    |       | Set specific environment configuration               |
-| `fwd env reset`                  |       | Reset environment to default state                   |
-| `fwd doctor`                     |       | Check system compatibility and configuration         |
-| `fwd run [script]`               |       | Run npm script from package.json                     |
-| `fwd exec [cli] [cmd [args...]]` |       | Execute any raw command in session                   |
-| `fwd add`                        |       | Add a package                                        |
-| `fwd remove`                     |       | Remove a package                                     |
+| Command                          | Alias        | Description                                          |
+| -------------------------------- | ------------ | ---------------------------------------------------- |
+| `fwd env init`                   | `i`          | Initialize environment and detect pipe & pkg manager |
+| `fwd env show`                   | `s`          | Show current environment configuration               |
+| `fwd env set`                    |              | Set specific environment configuration               |
+| `fwd env reset`                  | `r`          | Reset environment to default state                   |
+| `fwd doctor`                     | `d`          | Check system compatibility and configuration         |
+| `fwd run [script]`               |              | Run npm script from package.json                     |
+| `fwd exec [cli] [cmd [args...]]` |              | Execute any raw command in session                   |
+| `fwd add`                        | `install`    | Add a package                                        |
+| `fwd remove`                     | ``uninstall` | Remove a package                                     |
+| `fwd https [options]`            | `h`          | Run with HTTPS proxy (--script, --domain options)    |
 
 ---
 
@@ -74,6 +77,34 @@ fwd remove react
 - astro
 
 > Environment not detected? Just use: `fwd env set`
+
+## 🔒 HTTPS Support
+
+> ⚠️ **Important**:
+>
+> - The HTTPS command requires `sudo` privileges: `sudo fwd https`
+> - During first run, the SSL certificate will be added to your keychain and macOS may prompt for your password
+> - HTTPS support is fully tested on macOS and implemented (untested) on Linux
+
+The `https` command provides secure local development with automatic SSL certificates and domain mapping:
+
+```bash
+# Run dev script with default .dev domain (e.g., my-project.dev)
+sudo fwd https --script=dev
+
+# Run dev script with custom domain
+sudo fwd https --script=dev --domain=awesome-domain.com
+```
+
+### Hot Reload Support
+
+Hot reload is fully supported with the following configurations:
+
+- **Vite**: Works out of the box
+- **Create React App**: Requires a `.env` file with `WDS_SOCKET_PORT=443` for hot reload support
+- **Others (Next.js, etc.)**: Support may vary depending on the framework's configuration
+
+> Note: The HTTPS proxy automatically maps your project to a `.dev` domain (e.g., `357289.my-project.dev`)
 
 ---
 

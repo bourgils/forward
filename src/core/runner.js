@@ -30,7 +30,7 @@ function getFolderSize(folderPath) {
 const cwd = process.cwd();
 let alive = true;
 
-export async function runInTemp(pipe, args = []) {
+export async function runInTemp(pipe, args = [], onReadyCallback) {
   const start = Date.now();
   const { tempDir } = await getEnvPaths();
 
@@ -87,9 +87,9 @@ export async function runInTemp(pipe, args = []) {
 
   let linked = false;
 
-  logger.raw(`📁 Workspace dir: ${tempDir}`);
-  logger.raw(`📦 Copied: ${copied.join(', ')}`);
-  logger.raw(`📥 Installing with ${packageManager}...`);
+  logger.log(`Workspace dir: ${tempDir}`);
+  logger.log(`Copied: ${copied.join(', ')}`);
+  logger.log(`Installing with ${packageManager}...`);
 
   const subprocess = execa(packageManager, ['install'], {
     cwd: tempDir,
@@ -100,23 +100,21 @@ export async function runInTemp(pipe, args = []) {
     if (!alive) return;
     alive = false;
 
-    if (fs.pathExistsSync(lockPath)) {
+    if (fs.pathExistsSync(lockPath) && fs.lstatSync(lockPath).isFile()) {
       fs.removeSync(lockPath);
     }
-
+    logger.raw('\n');
     if (linked && fs.pathExistsSync(realNodeModules)) {
-      const stat = fs.lstatSync(realNodeModules);
-      if (stat.isSymbolicLink()) {
-        logger.raw('\n⛓️‍💥  Removing linked node_modules from project...');
-        fs.removeSync(realNodeModules);
-      }
+      logger.log('Removing linked node_modules from project...');
+      fs.removeSync(tempNodeModules);
+      fs.removeSync(realNodeModules);
     }
 
-    const sizeBefore = getFolderSize(tempDir);
+    logger.log('Cleaning up workspace...');
 
-    logger.raw('\n🧹 Cleaning up workspace...');
-
-    if (fs.pathExistsSync(tempDir)) {
+    let sizeBefore = 0;
+    if (fs.pathExistsSync(tempDir) && fs.lstatSync(tempDir).isDirectory()) {
+      sizeBefore = getFolderSize(tempDir);
       fs.removeSync(tempDir);
     }
 
@@ -133,10 +131,10 @@ export async function runInTemp(pipe, args = []) {
     process.exit(0);
   };
 
-  ['SIGINT', 'SIGTERM', 'SIGHUP'].forEach((signal) => {
+  ['SIGINT', 'SIGTERM', 'SIGHUP', 'exit'].forEach((signal) => {
     process.once(signal, async () => {
       subprocess.kill(signal);
-      await clean();
+      clean();
     });
   });
 
@@ -159,12 +157,12 @@ export async function runInTemp(pipe, args = []) {
   const tempNodeModules = path.join(tempDir, 'node_modules');
 
   if (!fs.pathExistsSync(realNodeModules)) {
-    logger.raw('🔗 Linking temp node_modules into project...');
+    logger.log('Linking temp node_modules into project...');
     fs.ensureSymlinkSync(tempNodeModules, realNodeModules, 'junction');
     linked = true;
   }
 
-  logger.raw(`\n🚀 Running: ${pipe} ${args.join(' ')}\n`);
+  logger.log(`Running: ${pipe} ${args.join(' ')}\n`);
 
   const child = execa(pipe, args, {
     cwd,
@@ -172,16 +170,9 @@ export async function runInTemp(pipe, args = []) {
     env,
   });
 
-  process.on('SIGINT', clean);
-  process.on('SIGTERM', clean);
-  process.on('exit', clean);
-
-  try {
-    await child;
-  } catch (error) {
-    if (error.message.includes(`Command failed`)) {
-      logger.error(`Failed to run command: ${error.message}`);
-    }
-    await clean();
+  if (onReadyCallback) {
+    await onReadyCallback(child);
   }
+
+  return child;
 }
