@@ -90,4 +90,30 @@ All notable changes to this project will be documented in this file.
 - Enhanced runtime checks with clearer error messages
 - Fixed typos in user-facing messages
 
+## [0.4.0]
+
+### Added
+
+- `fwd https`: New command for secure local development with HTTPS
+  - Automatic SSL certificate generation and management
+  - Local domain mapping with `.dev` TLD support
+  - Custom domain support via `--domain` option
+  - Hot reload support for Vite and Create React App
+- New core modules for HTTPS support:
+  - Certificate management (`src/lib/certs.js`)
+  - Host file management (`src/lib/hosts.js`)
+  - Port detection (`src/lib/port-watcher.js`)
+  - HTTPS proxy server (`src/lib/proxy.js`)
+
+### Changed
+
+- Enhanced project documentation with HTTPS usage guidelines
+- Improved README with clearer project description and limitations
+- Updated command aliases for better consistency
+
+### Fixed
+
+- DNS cache flushing on macOS for proper domain resolution
+- Certificate trust management for macOS keychain
+
 ---
