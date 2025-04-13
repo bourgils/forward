@@ -9,6 +9,7 @@ src/
 
 # configs
 .editorconfig
+.env
 .prettierrc
 eslint.config.js
 

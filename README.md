@@ -42,18 +42,18 @@ fwd remove react
 
 ## 🔧 CLI Commands
 
-| Command                          | Alias        | Description                                          |
-| -------------------------------- | ------------ | ---------------------------------------------------- |
-| `fwd env init`                   | `i`          | Initialize environment and detect pipe & pkg manager |
-| `fwd env show`                   | `s`          | Show current environment configuration               |
-| `fwd env set`                    |              | Set specific environment configuration               |
-| `fwd env reset`                  | `r`          | Reset environment to default state                   |
-| `fwd doctor`                     | `d`          | Check system compatibility and configuration         |
-| `fwd run [script]`               |              | Run npm script from package.json                     |
-| `fwd exec [cli] [cmd [args...]]` |              | Execute any raw command in session                   |
-| `fwd add`                        | `install`    | Add a package                                        |
-| `fwd remove`                     | ``uninstall` | Remove a package                                     |
-| `fwd https [options]`            | `h`          | Run with HTTPS proxy (--script, --domain options)    |
+| Command                    | Alias       | Description                                          |
+| -------------------------- | ----------- | ---------------------------------------------------- |
+| `fwd env init`             | `i`         | Initialize environment and detect pipe & pkg manager |
+| `fwd env show`             | `s`         | Show current environment configuration               |
+| `fwd env set`              |             | Set specific environment configuration               |
+| `fwd env reset`            | `r`         | Reset environment to default state                   |
+| `fwd doctor`               | `d`         | Check system compatibility and configuration         |
+| `fwd run [script]`         |             | Run npm script from package.json                     |
+| `fwd exec [cmd] [args...]` |             | Execute any raw command in session                   |
+| `fwd add`                  | `install`   | Add a package                                        |
+| `fwd remove`               | `uninstall` | Remove a package                                     |
+| `fwd https [options]`      | `h`         | Run with HTTPS proxy (--script, --domain options)    |
 
 ---
 
