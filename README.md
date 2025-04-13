@@ -14,6 +14,8 @@
 - 🔐 Dependencies are installed in a **temp session**, never your project
 - 🗑️ When the server stops, everything is cleaned
 - 🧙 Supports `install`, `uninstall`, and custom commands
+- 🌐 Run remote repositories directly with `--repository`
+- 🔒 HTTPS support with automatic SSL certificates
 
 ---
 
@@ -38,6 +40,19 @@ fwd add react react-dom
 fwd remove react
 ```
 
+### Run remote repositories
+
+```
+fwd run dev --repository=https://github.com/user/repo
+```
+
+### Run with HTTPS
+
+```
+sudo fwd run dev --https
+sudo fwd run dev --https --domain=custom-domain.com
+```
+
 ---
 
 ## 🔧 CLI Commands
@@ -53,7 +68,14 @@ fwd remove react
 | `fwd exec [cmd] [args...]` |             | Execute any raw command in session                   |
 | `fwd add`                  | `install`   | Add a package                                        |
 | `fwd remove`               | `uninstall` | Remove a package                                     |
-| `fwd https [options]`      | `h`         | Run with HTTPS proxy (--script, --domain options)    |
+
+### Run Command Options
+
+| Option         | Description                                         |
+| -------------- | --------------------------------------------------- |
+| `--repository` | Run from a remote repository (auto-clone & cleanup) |
+| `--https`      | Enable HTTPS with automatic SSL certificates        |
+| `--domain`     | Set custom domain for HTTPS (default: .dev)         |
 
 ---
 
@@ -64,6 +86,7 @@ fwd remove react
 - Provides runtime checks for compatibility
 - Launches your pipe (vite, next, etc.) with full hot reload support
 - Cleans everything after Ctrl+C
+- Supports remote repository execution with automatic cleanup
 
 ---
 
@@ -82,18 +105,18 @@ fwd remove react
 
 > ⚠️ **Important**:
 >
-> - The HTTPS command requires `sudo` privileges: `sudo fwd https`
+> - The `--https` option requires `sudo` privileges: `sudo fwd run dev --https`
 > - During first run, the SSL certificate will be added to your keychain and macOS may prompt for your password
 > - HTTPS support is fully tested on macOS and implemented (untested) on Linux
 
-The `https` command provides secure local development with automatic SSL certificates and domain mapping:
+Run any command with HTTPS support:
 
 ```bash
 # Run dev script with default .dev domain (e.g., my-project.dev)
-sudo fwd https --script=dev
+sudo fwd run dev --https
 
 # Run dev script with custom domain
-sudo fwd https --script=dev --domain=awesome-domain.com
+sudo fwd run dev --https --domain=awesome-domain.com
 ```
 
 ### Hot Reload Support
@@ -142,9 +165,23 @@ Made with ❤️ by @bourgils
 
 ---
 
-## 🗺️🚧 Roadmap
+## 🗺️ Roadmap
+
+The roadmap is currently open for suggestions! Here are some planned improvements:
 
 ### 🧠 Planned Features
 
-- 🧹 Code cleanup & architecture: refactor into classes/services for better structure — _coming soon_
-- ⚡️ Remote execution UX: support `fwd dist [github_repo]` to fetch & run a repo temporarily — _coming soon_
+- 🔍 Add ESLint plugin for consistent code style
+- 🔒 Add pre-commit hooks for code validation
+- _More coming soon..._
+
+Feel free to:
+
+- Open an issue with your feature request
+- Join the discussion about the future of Forward
+- Share your use cases and needs
+
+Previous roadmap items completed in v0.5.0:
+
+- 🧹 Code cleanup & architecture: refactor into classes/services for better structure
+- 🌐 Remote execution UX: support for running remote repositories
