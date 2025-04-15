@@ -8,7 +8,7 @@ import initHandler from './env/init.js';
 import chalk from 'chalk';
 
 const runHandler = async (script, options) => {
-  const { https, domain, repository, keepClone } = options;
+  const { https, domain, repository, keepClone, targetPort } = options;
 
   if (https && !isRunningWithSudo()) {
     logger.error('--https option needs sudo. Run `sudo fwd run --https`');
@@ -21,7 +21,18 @@ const runHandler = async (script, options) => {
     const repositoryPath = await repositoryManager.clone(repository, keepClone);
     await repositoryManager.enter(repositoryPath);
     cleanups.push(repositoryManager.cleanup.bind(repositoryManager));
-    await initHandler({ force: true });
+    try {
+      await initHandler({ force: true });
+    } catch {
+      await repositoryManager.cleanup();
+      process.exit(1);
+    }
+  }
+
+  if (!(await serviceFactory.envService.getPackageManager())) {
+    logger.error('No package manager found');
+    logger.raw(`Please run \`${chalk.bold('fwd env init')}\` to initialize your project`);
+    process.exit(1);
   }
 
   const packageManager = await serviceFactory.envService.getPackageManager();
@@ -64,7 +75,7 @@ const runHandler = async (script, options) => {
   let onReadyCallback;
 
   if (https) {
-    onReadyCallback = proxyServer.setup(domain);
+    onReadyCallback = proxyServer.setup(domain, targetPort);
     cleanups.push(proxyServer.cleanup.bind(proxyServer));
   }
 

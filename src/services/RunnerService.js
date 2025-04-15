@@ -56,8 +56,8 @@ class RunnerService {
     return this._runtimeHook.bind(this);
   }
 
-  _runtimeHook(thisCommand, actionCommand) {
-    const byPassedCommands = ['doctor', 'inspect', 'prune'];
+  async _runtimeHook(thisCommand, actionCommand) {
+    const byPassedCommands = ['doctor', 'inspect', 'prune', 'init'];
 
     const options = actionCommand.options || [];
     const hasRepositoryOptionDefined = options.some(

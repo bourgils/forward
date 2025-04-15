@@ -82,18 +82,19 @@ fwd modules prune    # Clean up unused dependencies
 
 ### `run` Command Options
 
-| Option         | Description                                         |
-| -------------- | --------------------------------------------------- |
-| `--repository` | Run from a remote repository (auto-clone & cleanup) |
-| `--keep-clone` | Keep the cloned repository after execution          |
-| `--https`      | Enable HTTPS with automatic SSL certificates        |
-| `--domain`     | Set custom domain for HTTPS (default: .dev)         |
+| Option              | Description                                                     |
+| ------------------- | --------------------------------------------------------------- |
+| `--repository`      | Run from a remote repository (auto-clone & cleanup)             |
+| `-k, --keep-clone`  | Keep the cloned repository after execution, in current location |
+| `-h, --https`       | Enable HTTPS with automatic trsuted SSL certificates            |
+| `-d, --domain`      | Set custom domain for HTTPS (default: .dev)                     |
+| `-t, --target-port` | Choose target port to forward traffic to (only with --https)    |
 
 ### `modules inspect` Command Options
 
 | Option               | Description                                                                        |
 | -------------------- | ---------------------------------------------------------------------------------- |
-| `-i, --ignore-paths` | Enable HTTPS with automatic SSL certificates                                       |
+| `-i, --ignore-paths` | Add paths to ignore during inspection                                              |
 | `-a, --also`         | Add some files or folders to looking for during inspection (eg, --also build,dist) |
 | `--all`              | Remove system paths and hidden files from default ignored paths                    |
 
@@ -101,34 +102,29 @@ fwd modules prune    # Clean up unused dependencies
 
 ### `modules prune` Command Options
 
-| Option               | Description                                                                        |
-| -------------------- | ---------------------------------------------------------------------------------- |
-| `-i, --ignore-paths` | Enable HTTPS with automatic SSL certificates                                       |
-| `-a, --also`         | Add some files or folders to looking for during inspection (eg, --also build,dist) |
-| `-y, --yes`          | Prevent prompt before prune files                                                  |
-| `--interactive`      | Allow path selection before prune                                                  |
+| Option               | Description                                                     |
+| -------------------- | --------------------------------------------------------------- |
+| `-i, --ignore-paths` | Add paths to ignore for prune (eg, --ignore-paths ~/me,~/prod ) |
+| `-a, --also`         | Add some files or folders to to prune (eg, --also build,dist)   |
+| `-y, --yes`          | Prevent prompt before prune files                               |
+| `--dry-run`          | Dry run the command                                             |
+| `--interactive`      | Allow path selection for prune                                  |
 
 ---
+
+> ⚠️ **Important**:
+> Please note that HTTPS support may require using the --target-port option in cases where concurrent processes are launched at startup and the detected port is not the target local server port. Additionally, hot-reload support with HTTPS may require configuration to forward WebSocket connections to the final server (e.g., for create-react-app (CRA), WDS_SOCKET_PORT=443 must be set in .env).
 
 ## 📁 How it works
 
 - Creates an isolated environment for your project
 - Manages dependencies in a temporary location
 - Provides runtime checks for compatibility
-- Launches your pipe (vite, next, etc.) with full hot reload support
+- Launches your scripts as you usually do or any raw command
 - Cleans everything after Ctrl+C
-- Supports remote repository execution with automatic cleanup
+- Supports remote repository execution with automatic cleanup, HTTPS proxy for local development and
 
 ---
-
-## 🧪 Supported pipes (auto-detected)
-
-- vite
-- next
-- nuxt
-- react-scripts
-- bun
-- astro
 
 > Environment not detected? Just use: `fwd env set`
 
@@ -143,12 +139,14 @@ fwd modules prune    # Clean up unused dependencies
 Run any command with HTTPS support:
 
 ```bash
-# Run dev script with default .dev domain (e.g., 3548945.my-project.dev)
+# Run dev script with default .dev domain (e.g., 357289.my-project.dev)
 sudo fwd run dev --https
 
 # Run dev script with custom domain
-sudo fwd run dev --https --domain=awesome-domain.com
+sudo fwd run dev --https --domain=awesome-app.dev
 ```
+
+> Mapping a .com, .net, .io, etc., which is probably a real domain, generates a warning. You can continue, but your browser's cache may cause problems.
 
 ### Hot Reload Support
 
@@ -158,7 +156,7 @@ Hot reload is fully supported with the following configurations:
 - **Create React App**: Requires a `.env` file with `WDS_SOCKET_PORT=443` for hot reload support
 - **Others (Next.js, etc.)**: Support may vary depending on the framework's configuration
 
-> Note: The HTTPS proxy automatically maps your project to a `.dev` domain (e.g., `357289.my-project.dev`)
+> Note: The HTTPS proxy defaults map your project to a `.dev` domain (e.g., `357289.my-project.dev`)
 
 ---
 

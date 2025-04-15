@@ -10,16 +10,17 @@ import httpProxy from 'http-proxy';
 import https from 'https';
 import fs from 'fs';
 
-const defaultDomain = `${serviceFactory.envService.getProjectId()}.${serviceFactory.envService.getProjectName()}.dev`;
-
 class ProxyServer {
   constructor() {
     this.proxy = null;
     this.domain = null;
+    this.targetPort = null;
   }
 
-  setup(domain) {
+  setup(domain, targetPort) {
+    const defaultDomain = `${serviceFactory.envService.getProjectId()}.${serviceFactory.envService.getProjectName()}.dev`;
     this.domain = domain || defaultDomain;
+    this.targetPort = targetPort;
 
     logger.info(`Launching with HTTPS`);
 
@@ -38,8 +39,15 @@ class ProxyServer {
     const spinner = ora(`Waiting for local server to expose a port…`).start();
 
     try {
-      const detectedPort = await waitForOpenPort(child.pid);
-      spinner.succeed(`Detected local server on port ${detectedPort}`);
+      let detectedPort = await waitForOpenPort(child.pid);
+
+      if (this.targetPort) {
+        logger.log(`Using target port ${this.targetPort} for the proxy…`);
+        detectedPort = this.targetPort;
+        spinner.stop();
+      } else {
+        spinner.succeed(`Detected local server on port ${detectedPort}`);
+      }
 
       await domainManager.writeToHosts(this.domain);
 
@@ -60,69 +68,74 @@ class ProxyServer {
   }
 
   async _createProxyServer({ domain, targetPort, cert, key }) {
-    const proxyPort = 443;
-    logger.log(`Creating proxy server on port ${proxyPort} proxying to ${targetPort}…`);
-    const proxy = httpProxy.createProxyServer({
-      target: `http://localhost:${targetPort}`,
-      targetPort: 3000,
-      domain,
-      changeOrigin: true,
-      ws: true,
-      secure: false,
-      proxyTimeout: 120000,
-      timeout: 120000,
-      followRedirects: true,
-      xfwd: true,
-      rejectUnauthorized: false,
-      cert,
-      key,
-    });
-
-    proxy.on('error', (err, req, res) => {
-      logger.error('Proxy error:', err.message);
-      if (!res.headersSent) {
-        res.writeHead(500, { 'Content-Type': 'text/plain' });
-      }
-      res.end('Proxy error.');
-    });
-
-    proxy.on('proxyReqWs', (proxyReq, req, socket, options) => {
-      logger.info('WebSocket connection established');
-      logger.info(`WebSocket target: ${options.target}`);
-    });
-
-    proxy.on('proxyReq', (proxyReq) => {
-      proxyReq.setHeader('Connection', 'keep-alive');
-      proxyReq.setHeader('Upgrade', 'websocket');
-      proxyReq.setHeader('Sec-WebSocket-Version', '13');
-    });
-
-    const server = https.createServer(
-      {
-        key: fs.readFileSync(key),
-        cert: fs.readFileSync(cert),
+    try {
+      const proxyPort = 443;
+      logger.log(`Creating proxy server on port ${proxyPort} proxying to ${targetPort}…`);
+      const proxy = httpProxy.createProxyServer({
+        target: `http://localhost:${targetPort}`,
+        targetPort: targetPort || 3000,
+        domain,
+        changeOrigin: true,
+        ws: true,
+        secure: false,
+        proxyTimeout: 120000,
+        timeout: 120000,
+        followRedirects: true,
+        xfwd: true,
         rejectUnauthorized: false,
-      },
-      (req, res) => {
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-        res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-        proxy.web(req, res);
-      }
-    );
+        cert,
+        key,
+      });
 
-    server.on('upgrade', (req, socket, head) => {
-      logger.info('Upgrade request received');
-      proxy.ws(req, socket, head);
-    });
+      proxy.on('error', (err, req, res) => {
+        logger.error('Proxy error:', err.message);
+        if (!res.headersSent) {
+          res.writeHead(500, { 'Content-Type': 'text/plain' });
+        }
+        res.end('Proxy error.');
+      });
 
-    server.listen(proxyPort, () => {
-      logger.success(
-        `Secure dev server is ready at ${chalk.cyan(chalk.underline(`https://${this.domain}`))}`
+      proxy.on('proxyReqWs', (proxyReq, req, socket, options) => {
+        logger.info('WebSocket connection established');
+        logger.info(`WebSocket target: ${options.target}`);
+      });
+
+      proxy.on('proxyReq', (proxyReq) => {
+        proxyReq.setHeader('Connection', 'keep-alive');
+        proxyReq.setHeader('Upgrade', 'websocket');
+        proxyReq.setHeader('Sec-WebSocket-Version', '13');
+      });
+
+      const server = https.createServer(
+        {
+          key: fs.readFileSync(key),
+          cert: fs.readFileSync(cert),
+          rejectUnauthorized: false,
+        },
+        (req, res) => {
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+          res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+          proxy.web(req, res);
+        }
       );
-    });
 
-    return server;
+      server.on('upgrade', (req, socket, head) => {
+        logger.info('Upgrade request received');
+        proxy.ws(req, socket, head);
+      });
+
+      server.listen(proxyPort, () => {
+        logger.success(
+          `Secure dev server is ready at ${chalk.cyan(chalk.underline(`https://${this.domain}`))}`
+        );
+      });
+
+      return server;
+    } catch (err) {
+      logger.error(`Server proxy fell: ${err.message}`);
+      process.exit(1);
+    }
   }
 
   async cleanup() {

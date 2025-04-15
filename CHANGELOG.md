@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.2] - Unreleased
+
+### Added
+
+- New `--target-port` option for HTTPS proxy to specify custom target port
+- Better error handling and user feedback for proxy server setup
+
+### Changed
+
+- Improved WebSocket support in HTTPS proxy
+- Enhanced documentation with HTTPS usage guidelines and warnings
+- Better error messages for proxy server configuration
+
+### Fixed
+
+- Proxy server configuration for concurrent processes
+- WebSocket connection handling in HTTPS mode
+
+## [0.6.1]
+
+### Added
+
+- Support for custom domains in HTTPS mode
+- Automatic port detection for local development servers
+- Hot reload support for various frameworks
+
+### Changed
+
+- Improved HTTPS proxy server configuration
+- Enhanced error handling for SSL certificate management
+- Better domain management with .dev TLD support
+
+### Fixed
+
+- SSL certificate generation and trust management
+- Domain resolution and hosts file management
+- WebSocket connection handling for hot reload
+
 ## [0.6.0]
 
 ### Added
@@ -50,7 +88,43 @@ All notable changes to this project will be documented in this file.
 - Repository cleanup after execution
 - Sudo privileges check for HTTPS operations
 
----
+## [0.6.2] - Unreleased
+
+### Added
+
+- New `--target-port` option for HTTPS proxy to specify custom target port
+- Better error handling and user feedback for proxy server setup
+
+### Changed
+
+- Improved WebSocket support in HTTPS proxy
+- Enhanced documentation with HTTPS usage guidelines and warnings
+- Better error messages for proxy server configuration
+
+### Fixed
+
+- Proxy server configuration for concurrent processes
+- WebSocket connection handling in HTTPS mode
+
+## [0.6.1]
+
+### Added
+
+- Support for custom domains in HTTPS mode
+- Automatic port detection for local development servers
+- Hot reload support for various frameworks
+
+### Changed
+
+- Improved HTTPS proxy server configuration
+- Enhanced error handling for SSL certificate management
+- Better domain management with .dev TLD support
+
+### Fixed
+
+- SSL certificate generation and trust management
+- Domain resolution and hosts file management
+- WebSocket connection handling for hot reload
 
 ## [0.4.0]
 
@@ -78,8 +152,6 @@ All notable changes to this project will be documented in this file.
 - DNS cache flushing on macOS for proper domain resolution
 - Certificate trust management for macOS keychain
 
----
-
 ## [0.3.0]
 
 ### Changed
@@ -96,8 +168,6 @@ All notable changes to this project will be documented in this file.
 - Enhanced runtime checks with clearer error messages
 - Fixed typos in user-facing messages
 
----
-
 ## [0.2.2]
 
 ### Enhanced
@@ -112,8 +182,6 @@ All notable changes to this project will be documented in this file.
 
 - Argument handling in multiple commands
 - Better handling of edge cases when no arguments provided
-
----
 
 ## [0.2.1]
 
@@ -142,8 +210,6 @@ All notable changes to this project will be documented in this file.
 - `fwd reset`: Replaced by `fwd env reset`
 - Session management system
 
----
-
 ## [0.1.1]
 
 ### Added
@@ -154,8 +220,6 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - Fixed a crash when running `fwd show` in a non-initialized project (before `fwd env init`)
-
----
 
 ## [0.1.0] - Initial Release
 
@@ -172,4 +236,4 @@ All notable changes to this project will be documented in this file.
 - 📦 Symlink strategy to support hot reload
 - 💾 Disk usage tracker + cleanup summary
 - 📦 Linter, Prettier, EditorConfig setup
-- 📄 README + roadmap
+- 🗺️ README + roadmap

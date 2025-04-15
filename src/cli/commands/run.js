@@ -5,6 +5,10 @@ export const runCommand = new Command('run')
   .description('Run an npm script inside a temporary workspace')
   .arguments('[script]', 'Script name defined in package.json')
   .option('-h, --https', 'Enable HTTPS proxy')
+  .option(
+    '-t, --target-port <port>',
+    'Target port for the proxy, default is auto-detected (only used with --https)'
+  )
   .option('-d, --domain <domain>', 'Custom domain (only used with --https)')
   .option('-r, --repository <url>', 'Use a remote repository on the fly')
   .option('-k, --keep-clone', 'Keep the cloned repository after running the script')
