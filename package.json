@@ -1,15 +1,14 @@
 {
   "name": "@bourgils/forward",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "A fast, temporary CLI runtime for JavaScript projects. Run commands without polluting your project.",
   "bin": {
     "fwd": "./bin/fwd.js"
   },
   "type": "module",
-  "main": "src/cli/index.js",
+  "main": "dist/cli/index.js",
   "files": [
     "bin",
-    "src",
     "dist"
   ],
   "scripts": {
