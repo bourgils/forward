@@ -1,8 +1,8 @@
 import logger from '../../lib/Logger.js';
 import serviceFactory from '../../services/index.js';
 
-const execHandler = async (_, __, commandObject) => {
-  const { args } = commandObject;
+const execHandler = async (args, options) => {
+  const { noDeps } = options;
 
   const cmd = args[0];
   const cmdArgs = args.slice(1);
@@ -18,7 +18,7 @@ const execHandler = async (_, __, commandObject) => {
   }
 
   logger.log(`Executing: ${cmd} ${cmdArgs.join(' ')}`);
-  await serviceFactory.runnerService.run(cmd, cmdArgs);
+  await serviceFactory.runnerService.run(cmd, cmdArgs, { installDeps: !noDeps });
 };
 
 export default execHandler;

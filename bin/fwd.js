@@ -21,7 +21,7 @@ const entryPath = pathToFileURL(entry).href;
 const { default: main } = await import(entryPath);
 if (typeof main === 'function') {
   if (isDev) {
-    console.log(chalk.gray(`🧑🏽‍💻 Reading with ${chalk.bold(chalk.cyan('FWD_DEV=true'))}`));
+    console.log(chalk.gray(`💻 Reading with ${chalk.bold(chalk.cyan('FWD_DEV=true'))}`));
   }
   await main();
 } else {

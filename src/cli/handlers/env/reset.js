@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import serviceFactory from '../../../services/index.js';
 
-const resetHandler = async (cmd, { force }) => {
+const resetHandler = async ({ force }) => {
   const { tempDir, envFile } = await serviceFactory.envService.getEnvPaths();
 
   if (await fs.pathExists(path.join(tempDir, '.fwd.lock'))) {

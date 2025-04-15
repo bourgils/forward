@@ -21,7 +21,7 @@ class ProxyServer {
   setup(domain) {
     this.domain = domain || defaultDomain;
 
-    logger.log(`Launching with HTTPS on https://${this.domain}...`);
+    logger.info(`Launching with HTTPS`);
 
     if (domainManager.isLikelyPublicDomain(this.domain)) {
       const localDomain = this.domain.split('.').slice(0, -1).join('.');
@@ -35,7 +35,7 @@ class ProxyServer {
   }
 
   async _attachProxy(child) {
-    const spinner = ora(`Waiting for local server to expose a port...`).start();
+    const spinner = ora(`Waiting for local server to expose a port…`).start();
 
     try {
       const detectedPort = await waitForOpenPort(child.pid);
@@ -52,15 +52,16 @@ class ProxyServer {
         key,
       });
 
-      logger.success(`Secure dev server is ready at: ${chalk.underline(`https://${this.domain}`)}`);
       await open(`https://${this.domain}`);
     } catch (err) {
       spinner.fail(`Failed: ${err.message}`);
-      this._cleanup();
+      this.cleanup();
     }
   }
 
   async _createProxyServer({ domain, targetPort, cert, key }) {
+    const proxyPort = 443;
+    logger.log(`Creating proxy server on port ${proxyPort} proxying to ${targetPort}…`);
     const proxy = httpProxy.createProxyServer({
       target: `http://localhost:${targetPort}`,
       targetPort: 3000,
@@ -115,15 +116,20 @@ class ProxyServer {
       proxy.ws(req, socket, head);
     });
 
-    server.listen(443);
+    server.listen(proxyPort, () => {
+      logger.success(
+        `Secure dev server is ready at ${chalk.cyan(chalk.underline(`https://${this.domain}`))}`
+      );
+    });
 
     return server;
   }
 
-  async _cleanup() {
+  async cleanup() {
     if (this.proxy) {
-      logger.log('Cleaning up HTTPS proxy...');
+      logger.log('Closing HTTPS proxy…');
       this.proxy.close();
+      logger.success('Proxy closed');
     }
     await domainManager.removeFromHosts(this.domain);
   }

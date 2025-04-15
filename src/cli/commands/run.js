@@ -7,4 +7,5 @@ export const runCommand = new Command('run')
   .option('-h, --https', 'Enable HTTPS proxy')
   .option('-d, --domain <domain>', 'Custom domain (only used with --https)')
   .option('-r, --repository <url>', 'Use a remote repository on the fly')
+  .option('-k, --keep-clone', 'Keep the cloned repository after running the script')
   .action(runHandler);

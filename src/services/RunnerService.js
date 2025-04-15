@@ -5,7 +5,8 @@ import prettyMs from 'pretty-ms';
 import prettyBytes from 'pretty-bytes';
 import logger from '../lib/Logger.js';
 import chalk from 'chalk';
-import ora from 'ora';
+import { getFolderSize } from '../utils/folder.js';
+import prompts from 'prompts';
 
 class RunnerService {
   constructor(envService) {
@@ -34,11 +35,21 @@ class RunnerService {
 
     await this._prepareEnv();
     await this._copyFiles();
+
     if (installDeps) {
       await this._installDependencies();
       await this._linkNodeModules();
+    } else {
+      logger.info('Skipping dependencies installation');
     }
-    return await this._runPipe();
+    try {
+      return await this._runPipe();
+    } catch (error) {
+      if (!error.message.includes('CTRL-C')) {
+        logger.error(error);
+      }
+      await this._clean();
+    }
   }
 
   runtimeCheck() {
@@ -46,6 +57,8 @@ class RunnerService {
   }
 
   _runtimeHook(thisCommand, actionCommand) {
+    const byPassedCommands = ['doctor', 'inspect', 'prune'];
+
     const options = actionCommand.options || [];
     const hasRepositoryOptionDefined = options.some(
       (opt) => opt.long === '--repository' || opt.short === '-r'
@@ -54,7 +67,7 @@ class RunnerService {
     const repositoryValue = actionCommand.opts().repository;
     const hasRepositoryOptionPassed = repositoryValue !== undefined && hasRepositoryOptionDefined;
 
-    if (actionCommand.name() === 'doctor' || hasRepositoryOptionPassed) return;
+    if (byPassedCommands.includes(actionCommand.name()) || hasRepositoryOptionPassed) return;
 
     if (!this.envService.hasPackageJson()) {
       logger.error('No package.json found');
@@ -112,29 +125,43 @@ class RunnerService {
       this.copied.push(lockFile);
     }
 
-    logger.log(`Workspace dir: ${this.tempDir}`);
-    logger.log(`Copied: ${this.copied.join(', ')}`);
+    logger.info(`Workspace dir: ${chalk.bold(this.tempDir)}`);
+    logger.info(`Symlink to: ${chalk.bold(this.copied.join(', '))}`);
   }
 
   async _installDependencies() {
+    if (fs.pathExistsSync(this.realNodeModules)) {
+      logger.warn(`It looks like you have ${chalk.bold('node_modules')} folder in your project`);
+
+      const answer = await prompts({
+        type: 'confirm',
+        name: 'remove',
+        message: 'Do you want to remove it?',
+      });
+
+      if (answer.remove) {
+        fs.removeSync(this.realNodeModules);
+      }
+    }
+
     this.env = {
       ...process.env,
       PATH: `${path.join(this.tempDir, 'node_modules', '.bin')}${path.delimiter}${process.env.PATH}`,
     };
 
-    logger.log(`Installing with ${this.packageManager}...`);
+    logger.log(`Installing dependencies with ${chalk.bold(this.packageManager)}…`);
 
     const subprocess = execa(this.packageManager, ['install'], {
       cwd: this.tempDir,
       env: this.env,
     });
 
-    this._setupSignalCleanup(subprocess);
+    this._setupSignalCleanup();
 
     try {
       const { stdout, stderr } = await subprocess;
       if (stdout) logger.box.info(`${this.packageManager} install`, stdout);
-      if (stderr) logger.error(`Errors:\n ${stderr}`);
+      if (stderr) logger.box.error('Installation errors', stderr);
     } catch (error) {
       logger.error(`${this.packageManager} install failed: ${error.message}`);
       await this._clean();
@@ -143,14 +170,16 @@ class RunnerService {
 
   async _linkNodeModules() {
     if (!fs.pathExistsSync(this.realNodeModules) && fs.pathExistsSync(this.tempNodeModules)) {
-      logger.log('Linking temp node_modules into project...');
+      logger.log('Linking temp dependencies into project…');
       fs.ensureSymlinkSync(this.tempNodeModules, this.realNodeModules, 'junction');
       this.linked = true;
+      logger.success('Linked');
     }
   }
 
   async _runPipe() {
-    logger.log(`Running: ${this.pipe} ${this.args.join(' ')}\n`);
+    logger.raw('\n');
+    logger.info(`Running: ${chalk.bold(`${this.pipe} ${this.args.join(' ')}`)}\n`);
 
     const child = execa(this.pipe, this.args, {
       cwd: this.cwd,
@@ -162,16 +191,15 @@ class RunnerService {
       await this.onReadyCallback(child);
     }
 
-    this._setupSignalCleanup(child);
+    this._setupSignalCleanup();
 
     return child;
   }
 
-  _setupSignalCleanup(subprocess) {
+  _setupSignalCleanup() {
     const signals = ['SIGINT', 'SIGTERM', 'SIGHUP', 'exit'];
     signals.forEach((signal) => {
       process.once(signal, async () => {
-        subprocess.kill(signal);
         await this._clean();
       });
     });
@@ -182,26 +210,31 @@ class RunnerService {
     this.alive = false;
 
     logger.raw('\n');
-    const spinner = ora('Cleaning up ...\n').start();
-
-    let sizeBefore = 0;
-    if (fs.pathExistsSync(this.tempDir) && fs.lstatSync(this.tempDir).isDirectory()) {
-      try {
-        sizeBefore = this._getFolderSize(this.tempDir);
-        fs.removeSync(this.tempDir);
-      } catch {
-        //
-      }
-    }
 
     if (fs.pathExistsSync(this.lockPath) && fs.lstatSync(this.lockPath).isFile()) {
       fs.removeSync(this.lockPath);
     }
 
-    if (this.linked && fs.pathExistsSync(this.realNodeModules)) {
-      logger.log('Removing linked node_modules from project...');
-      fs.removeSync(this.tempNodeModules);
+    let sizeBefore = 0;
+
+    if (
+      fs.pathExistsSync(this.tempNodeModules) &&
+      fs.pathExistsSync(this.realNodeModules) &&
+      fs.lstatSync(this.realNodeModules).isSymbolicLink()
+    ) {
+      logger.log('Removing linked node_modules from project…');
+      sizeBefore = getFolderSize(this.tempNodeModules);
       fs.removeSync(this.realNodeModules);
+      fs.removeSync(this.tempNodeModules);
+    }
+
+    if (fs.pathExistsSync(this.tempDir) && fs.lstatSync(this.tempDir).isDirectory()) {
+      try {
+        sizeBefore = getFolderSize(this.tempDir);
+        fs.removeSync(this.tempDir);
+      } catch {
+        //
+      }
     }
 
     if (this.cleanups && this.cleanups.length > 0) {
@@ -214,11 +247,11 @@ class RunnerService {
       }
     }
 
-    logger.log('Cleaning up workspace...');
+    logger.log('Cleaning up workspace…');
 
     const duration = Date.now() - this.start;
 
-    spinner.succeed('Execution purged');
+    logger.success('Cleaned up');
 
     logger.box.success(
       'Workspace removed',
@@ -229,23 +262,6 @@ class RunnerService {
     );
 
     process.exit(0);
-  }
-
-  _getFolderSize(folderPath) {
-    let total = 0;
-
-    function walk(dir) {
-      const files = fs.readdirSync(dir);
-      for (const file of files) {
-        const fullPath = path.join(dir, file);
-        const stat = fs.statSync(fullPath);
-        if (stat.isDirectory()) walk(fullPath);
-        else total += stat.size;
-      }
-    }
-
-    walk(folderPath);
-    return total;
   }
 }
 

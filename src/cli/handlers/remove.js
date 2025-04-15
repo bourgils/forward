@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import logger from '../../lib/Logger.js';
 import serviceFactory from '../../services/index.js';
 
@@ -18,7 +19,9 @@ const removeHandler = async (...args) => {
 
   const commandArgs = ['uninstall', ...packages];
 
-  logger.log(`Using ${packageManager} to remove package(s): ${packages.join(', ')}`);
+  logger.info(
+    `Using ${chalk.bold(packageManager)} to remove package(s): ${chalk.bold(packages.join(', '))}`
+  );
 
   await serviceFactory.runnerService.run(packageManager, commandArgs, { installDeps: false });
 };

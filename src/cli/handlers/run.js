@@ -5,9 +5,10 @@ import proxyServer from '../../lib/ProxyServer.js';
 import { isRunningWithSudo } from '../../utils/sudo.js';
 import repositoryManager from '../../lib/RepositoryManager.js';
 import initHandler from './env/init.js';
+import chalk from 'chalk';
 
 const runHandler = async (script, options) => {
-  const { https, domain, repository } = options;
+  const { https, domain, repository, keepClone } = options;
 
   if (https && !isRunningWithSudo()) {
     logger.error('--https option needs sudo. Run `sudo fwd run --https`');
@@ -17,10 +18,10 @@ const runHandler = async (script, options) => {
   const cleanups = [];
 
   if (repository) {
-    const repositoryPath = await repositoryManager.clone(repository);
+    const repositoryPath = await repositoryManager.clone(repository, keepClone);
     await repositoryManager.enter(repositoryPath);
     cleanups.push(repositoryManager.cleanup.bind(repositoryManager));
-    await initHandler(null, { force: true });
+    await initHandler({ force: true });
   }
 
   const packageManager = await serviceFactory.envService.getPackageManager();
@@ -58,13 +59,13 @@ const runHandler = async (script, options) => {
 
   const commandArgs = ['run', script];
 
-  logger.log(`Using ${packageManager} to run script: ${script}`);
+  logger.info(`Using ${chalk.bold(packageManager)} to run script: ${chalk.bold(script)}`);
 
   let onReadyCallback;
 
   if (https) {
     onReadyCallback = proxyServer.setup(domain);
-    cleanups.push(proxyServer._cleanup.bind(proxyServer));
+    cleanups.push(proxyServer.cleanup.bind(proxyServer));
   }
 
   return serviceFactory.runnerService.run(packageManager, commandArgs, {

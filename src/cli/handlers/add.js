@@ -1,13 +1,9 @@
+import chalk from 'chalk';
 import logger from '../../lib/Logger.js';
 import serviceFactory from '../../services/index.js';
 
 const addHandler = async (...args) => {
   const packageManager = await serviceFactory.envService.getPackageManager();
-
-  // if (!packageManager) {
-  //   logger.error('No package manager found. Run "fwd env init" first.');
-  //   process.exit(1);
-  // }
 
   const packages = args[2].args;
 
@@ -18,7 +14,9 @@ const addHandler = async (...args) => {
 
   const commandArgs = ['install', ...packages];
 
-  logger.log(`Using ${packageManager} to install package(s): ${packages.join(', ')}`);
+  logger.info(
+    `Using ${chalk.bold(packageManager)} to install package(s): ${chalk.bold(packages.join(', '))}`
+  );
 
   await serviceFactory.runnerService.run(packageManager, commandArgs, { installDeps: false });
 };

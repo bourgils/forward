@@ -1,4 +1,4 @@
-# ⚡️ forward (CLI: `fwd`)
+# 💻 forward (CLI: `fwd`)
 
 > Isolated, throwaway runtime for modern frontend projects
 > No `node_modules`, no pollution — just run, dev, and it disappears.
@@ -16,6 +16,7 @@
 - 🧙 Supports `install`, `uninstall`, and custom commands
 - 🌐 Run remote repositories directly with `--repository`
 - 🔒 HTTPS support with automatic SSL certificates
+- 📊 Inspect and manage node_modules with modules commands
 
 ---
 
@@ -44,6 +45,7 @@ fwd remove react
 
 ```
 fwd run dev --repository=https://github.com/user/repo
+fwd run dev --repository=https://github.com/user/repo --keep-clone  # Keep the clone after execution
 ```
 
 ### Run with HTTPS
@@ -53,29 +55,58 @@ sudo fwd run dev --https
 sudo fwd run dev --https --domain=custom-domain.com
 ```
 
+### Manage node_modules
+
+```
+fwd modules inspect . --also dist,build,.*cache  # Show node_modules content and size
+fwd modules prune    # Clean up unused dependencies
+```
+
 ---
 
 ## 🔧 CLI Commands
 
-| Command                    | Alias       | Description                                          |
-| -------------------------- | ----------- | ---------------------------------------------------- |
-| `fwd env init`             | `i`         | Initialize environment and detect pipe & pkg manager |
-| `fwd env show`             | `s`         | Show current environment configuration               |
-| `fwd env set`              |             | Set specific environment configuration               |
-| `fwd env reset`            | `r`         | Reset environment to default state                   |
-| `fwd doctor`               | `d`         | Check system compatibility and configuration         |
-| `fwd run [script]`         |             | Run npm script from package.json                     |
-| `fwd exec [cmd] [args...]` |             | Execute any raw command in session                   |
-| `fwd add`                  | `install`   | Add a package                                        |
-| `fwd remove`               | `uninstall` | Remove a package                                     |
+| Command                      | Alias       | Description                                                 |
+| ---------------------------- | ----------- | ----------------------------------------------------------- |
+| `fwd env init`               | `i`         | Initialize environment and detect pipe & pkg manager        |
+| `fwd env show`               | `s`         | Show current environment configuration                      |
+| `fwd env set`                |             | Set specific environment configuration                      |
+| `fwd env reset`              | `r`         | Reset environment to default state                          |
+| `fwd doctor`                 | `d`         | Check system compatibility and configuration                |
+| `fwd run [script]`           |             | Run npm script from package.json                            |
+| `fwd exec [cmd] [args...]`   |             | Execute any raw command in session                          |
+| `fwd add [package]`          | `install`   | Add a package                                               |
+| `fwd remove [package]`       | `uninstall` | Remove a package                                            |
+| `fwd modules inspect [root]` |             | Inspect node_modules content and size from [root] directory |
+| `fwd modules prune [root]`   |             | Clean up unused dependencies from [root] directory          |
 
-### Run Command Options
+### `run` Command Options
 
 | Option         | Description                                         |
 | -------------- | --------------------------------------------------- |
 | `--repository` | Run from a remote repository (auto-clone & cleanup) |
+| `--keep-clone` | Keep the cloned repository after execution          |
 | `--https`      | Enable HTTPS with automatic SSL certificates        |
 | `--domain`     | Set custom domain for HTTPS (default: .dev)         |
+
+### `modules inspect` Command Options
+
+| Option               | Description                                                                        |
+| -------------------- | ---------------------------------------------------------------------------------- |
+| `-i, --ignore-paths` | Enable HTTPS with automatic SSL certificates                                       |
+| `-a, --also`         | Add some files or folders to looking for during inspection (eg, --also build,dist) |
+| `--all`              | Remove system paths and hidden files from default ignored paths                    |
+
+---
+
+### `modules prune` Command Options
+
+| Option               | Description                                                                        |
+| -------------------- | ---------------------------------------------------------------------------------- |
+| `-i, --ignore-paths` | Enable HTTPS with automatic SSL certificates                                       |
+| `-a, --also`         | Add some files or folders to looking for during inspection (eg, --also build,dist) |
+| `-y, --yes`          | Prevent prompt before prune files                                                  |
+| `--interactive`      | Allow path selection before prune                                                  |
 
 ---
 
@@ -112,7 +143,7 @@ sudo fwd run dev --https --domain=custom-domain.com
 Run any command with HTTPS support:
 
 ```bash
-# Run dev script with default .dev domain (e.g., my-project.dev)
+# Run dev script with default .dev domain (e.g., 3548945.my-project.dev)
 sudo fwd run dev --https
 
 # Run dev script with custom domain
@@ -146,6 +177,7 @@ Want to test locally?
 ```
 git clone https://github.com/bourgils/forward
 cd
+cp .env.local .env # For CRA HTTPS support
 npm install
 npm link
 ```
@@ -154,7 +186,7 @@ Then go into any project and run:
 
 ```
 fwd env init
-fwd dev or fwd start
+fwd run dev or fwd run start
 ```
 
 ---

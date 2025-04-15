@@ -9,12 +9,21 @@ import chalk from 'chalk';
 let repositoryPath = null;
 
 class RepositoryManager {
-  async clone(url) {
+  constructor() {
+    this.keepClone = false;
+  }
+
+  async clone(url, keepClone = false) {
     await this._validateRepositoryUrl(url);
+    this.keepClone = keepClone;
 
     const repositoryName = url.split('/').pop().split('.')[0];
 
-    repositoryPath = join(serviceFactory.envService.repositoriesDir, repositoryName);
+    if (keepClone) {
+      repositoryPath = join(process.cwd(), repositoryName);
+    } else {
+      repositoryPath = join(serviceFactory.envService.repositoriesDir, repositoryName);
+    }
 
     if (fs.existsSync(repositoryPath)) {
       const { confirm } = await prompts({
@@ -35,9 +44,7 @@ class RepositoryManager {
         stdio: 'inherit',
       });
 
-      logger.success(
-        `Repository ${chalk.cyan(repositoryName)} cloned in ${chalk.cyan(repositoryPath)}`
-      );
+      logger.success(`Cloned successfully in ${chalk.cyan(repositoryPath)}`);
 
       return repositoryPath;
     } catch (error) {
@@ -72,10 +79,19 @@ class RepositoryManager {
   async cleanup() {
     const { envFile } = await serviceFactory.envService.getEnvPaths();
     await this.exit();
-    logger.log(`Cleaning up repository at ${repositoryPath}`);
-    fs.removeSync(repositoryPath);
-    if (fs.existsSync(envFile)) {
-      fs.removeSync(envFile);
+    if (!this.keepClone) {
+      logger.log(`Cleaning up repository…`);
+
+      fs.removeSync(repositoryPath);
+
+      logger.success(`Repository removed from ${chalk.cyan(repositoryPath)}`);
+
+      if (fs.existsSync(envFile)) {
+        fs.removeSync(envFile);
+        logger.success(`Environment removed`);
+      }
+    } else {
+      logger.secondary(`${chalk.cyan('--keep-clone')} → Repository kept at ${repositoryPath}`);
     }
   }
 }

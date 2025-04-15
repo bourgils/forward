@@ -19,7 +19,7 @@ class CertManager {
       return { cert: certPath, key: keyPath };
     }
 
-    logger.info(`Generating self-signed cert for ${domain}...`);
+    logger.log(`Generating self-signed cert for ${domain}…`);
 
     const pki = forge.pki;
     const keys = pki.rsa.generateKeyPair(2048);
@@ -75,7 +75,7 @@ class CertManager {
     }
 
     if (platform === 'darwin') {
-      logger.log(`Adding ${domain} cert to keychain...`);
+      logger.log(`Adding ${domain} cert to keychain…`);
       try {
         await execa(
           'security',
@@ -89,7 +89,7 @@ class CertManager {
       }
     } else if (platform === 'linux') {
       const dest = `/usr/local/share/ca-certificates/${id}-${domain}.crt`;
-      logger.log(`Adding ${domain} cert to Linux CA store...`);
+      logger.log(`Adding ${domain} cert to Linux CA store…`);
       await execa('sudo', ['cp', certPath, dest], { stdio: 'inherit' });
       await execa('sudo', ['update-ca-certificates'], { stdio: 'inherit' });
       logger.success(`Trusted cert added for ${domain}`);

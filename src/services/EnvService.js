@@ -144,23 +144,17 @@ class EnvService {
     const config = await this.getEnvConfig();
     const { tempDir } = await this.getEnvPaths();
 
-    if (!config.currentPipe && !config.currentPackageManager) {
-      logger.info('No active env found for this project. Run `fwd env init`.');
+    if (!config.currentPackageManager) {
+      logger.error('No active environment found for this project. Run `fwd env init`');
       return;
     }
 
     const lines = [];
 
-    lines.push(`💻 Project name: ${chalk.bold(config.projectName)}`);
-    if (config.currentPipe) {
-      lines.push(`📦 Pipe: ${chalk.bold(config.currentPipe)}`);
-      if (config.autoDetectedPipe && config.autoDetectedPipe !== config.currentPipe) {
-        lines.push(`   (auto-detected: ${chalk.gray(config.autoDetectedPipe)})`);
-      }
-    }
+    lines.push(`Project name: ${chalk.bold(chalk.cyan(config.projectName))}`);
 
     if (config.currentPackageManager) {
-      lines.push(`🛠  Package Manager: ${chalk.bold(config.currentPackageManager)}`);
+      lines.push(`Package Manager: ${chalk.bold(chalk.cyan(config.currentPackageManager))}`);
       if (
         config.autoDetectedPackageManager &&
         config.autoDetectedPackageManager !== config.currentPackageManager
@@ -172,12 +166,27 @@ class EnvService {
     const scriptsList = this.getScriptsList();
 
     lines.push(
-      scriptsList.length > 0 ? `🧾 Scripts: ${scriptsList.join(', ')}` : '🧾 Scripts: none'
+      scriptsList.length > 0
+        ? `Scripts: ${chalk.bold(chalk.cyan(scriptsList.join(', ')))}`
+        : 'Scripts: none'
     );
 
-    lines.push(`📁 Workspace: ${tempDir}`);
+    lines.push(`Workspace: ${chalk.bold(chalk.cyan(tempDir))}`);
 
     return lines;
+  }
+
+  async showEnvLinesInfo() {
+    const envLinesInfo = await this.getEnvLinesInfo();
+    const { envsDir } = await this.getEnvPaths();
+
+    logger.raw('\n');
+    logger.secondary(chalk.bold('Environment'), `(${envsDir}/${this.getProjectId()}.json)`);
+    logger.raw('\n');
+    for (const line of envLinesInfo) {
+      logger.raw(`\t→ ${line}`);
+    }
+    logger.raw('\n');
   }
 }
 
