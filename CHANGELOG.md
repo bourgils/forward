@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0]
+
+### Added
+
+- New `modules` command with `inspect` and `prune` subcommands
+- `--keep-clone` option for repository execution
+- Directory size inspection with human-readable format
+- Support for custom ignore paths in modules commands
+- Interactive mode for modules prune
+
+### Changed
+
+- Improved logging system with better formatting and colors
+- Enhanced error messages and success notifications
+- Better repository management with cleanup options
+- Refactored folder handling with new DirectoryManager
+- Extracted utilities for better code organization
+
+### Fixed
+
+- Repository cleanup after execution
+- Sudo privileges check for HTTPS operations
+- Improved error handling in various commands
+
 ## [0.5.0]
 
 ### Added
